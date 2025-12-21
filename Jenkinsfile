@@ -46,7 +46,7 @@ pipeline {
             parallel {
                 stage('Lint') {
                     steps {
-                        bat 'npm run lint'
+                        bat 'npx ng lint'
                     }
                     post {
                         success { echo 'Lint succeeded.' }
@@ -57,7 +57,7 @@ pipeline {
                 stage('Test') {
                     steps {
                         // Ignore les échecs pour l'instant si Karma échoue sur Edge
-                        bat 'ng test --watch=false || exit 0'
+                        bat 'npx ng test --watch=false || exit 0'
                     }
                     post {
                         success { echo 'Tests passed.' }
