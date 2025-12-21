@@ -15,7 +15,7 @@ pipeline {
     }
 
     environment {
-        GIT_CRED = credentials('github_cred')
+        GIT_CRED = credentials('github_cred') // ID de ton credential GitHub
     }
 
     stages {
@@ -34,13 +34,11 @@ pipeline {
         }
 
         stage('Build') {
-           stage('Build') {
-         steps {
-        bat 'set PATH=C:\\Users\\Doua\\AppData\\Roaming\\npm;%PATH% && ng build'
-        echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
-    }
-}
-
+            steps {
+                // Ajouter Angular CLI au PATH pour Jenkins
+                bat 'set PATH=C:\\Users\\Doua\\AppData\\Roaming\\npm;%PATH% && ng build'
+                echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
+            }
         }
 
         stage('Quality Checks') {
