@@ -61,11 +61,12 @@ pipeline {
                     steps {
                         withSonarQubeEnv('sq1') {
                             bat '''
-                            npx sonar-scanner ^
-                            -Dsonar.projectKey=SnapTrend ^
-                            -Dsonar.sources=src ^
-                            -Dsonar.host.url=${env.SONAR_HOST_URL} ^
-                            -Dsonar.login=${ env.SONAR_AUTH_TOKEN}
+                              sonar-scanner \
+                              -Dsonar.projectKey=SnapTrend \
+                              -Dsonar.sources=src \
+                              -Dsonar.host.url=http://localhost:9000 \
+                              -Dsonar.login=<SONAR_AUTH_TOKEN>
+
                             '''
                         }
                     }
