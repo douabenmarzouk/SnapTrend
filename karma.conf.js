@@ -5,7 +5,7 @@ module.exports = function (config) {
     frameworks: ['jasmine'],
     plugins: [
       require('karma-jasmine'),
-      require('karma-edge-launcher'),
+      require('karma-chrome-launcher'), // <-- remplacer karma-edge-launcher
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
     ],
@@ -27,9 +27,8 @@ module.exports = function (config) {
     },
     reporters: ['progress', 'kjhtml'],
 
-    // Lancer Edge en mode headless pour éviter les crashs
-    browsers: ['Edge'],
-
+    // Lancer Chrome en mode headless pour CI
+    browsers: ['ChromeHeadless'],
 
     restartOnFileChange: true,
     singleRun: true // utile pour CI / build automatisé
