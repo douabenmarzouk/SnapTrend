@@ -34,10 +34,13 @@ pipeline {
         }
 
         stage('Build') {
-            steps {
-                bat 'ng build'
-                echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
-            }
+           stage('Build') {
+         steps {
+        bat 'set PATH=C:\\Users\\Doua\\AppData\\Roaming\\npm;%PATH% && ng build'
+        echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
+    }
+}
+
         }
 
         stage('Quality Checks') {
