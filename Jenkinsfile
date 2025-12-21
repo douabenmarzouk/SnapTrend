@@ -15,7 +15,9 @@ pipeline {
     }
 
     environment {
-        GIT_CRED = credentials('github_cred') // ID de ton credential GitHub
+        GIT_CRED = credentials('github_cred')
+        SONAR_AUTH_TOKEN = credentials('jenkins-sonare')
+        SONAR_HOST_URL = 'http://localhost:9000'    // ID de ton credential GitHub
     }
 
     stages {
@@ -55,6 +57,19 @@ pipeline {
                         unstable { echo 'Lint has warnings.' }
                     }
                 }
+                stage('SonarQube Scan') {
+                    steps {
+                        withSonarQubeEnv('sq1') {
+                            bat '''
+                            npx sonar-scanner ^
+                            -Dsonar.projectKey=SnapTrend ^
+                            -Dsonar.sources=src ^
+                            -Dsonar.host.url=${env.SONAR_HOST_URL} ^
+                            -Dsonar.login=${ env.SONAR_AUTH_TOKEN}
+                            '''
+                        }
+                    }
+                }
                 stage('Test') {
                     steps {
                         // Ignore les échecs pour l'instant si Karma échoue sur Edge
@@ -80,7 +95,9 @@ pipeline {
             echo 'Build complet avec succès !'
         }
         failure {
-            echo 'Échec du build. Vérifie les logs.'
-        }
+         mail to: 'benmarzoudoua@gmail.com',
+             subject: "Échec du build Jenkins: ${env.JOB_NAME}",
+             body: "Le build #${env.BUILD_NUMBER} a échoué. Voir les logs: ${env.BUILD_URL}"
+    }
     }
 }
