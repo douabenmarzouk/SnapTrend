@@ -1,0 +1,79 @@
+<header class="header">
+  <div class="header-container">
+   
+    <div class="logo" (click)="navigateToHome()">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 0C7.163 0 0 7.163 0 16c0 6.77 4.223 12.559 10.166 14.906-.14-1.29-.267-3.27.056-4.676.292-1.272 1.888-8.002 1.888-8.002s-.482-.964-.482-2.388c0-2.237 1.297-3.908 2.911-3.908 1.373 0 2.036 1.031 2.036 2.266 0 1.38-.879 3.442-1.333 5.352-.379 1.603.804 2.911 2.387 2.911 2.864 0 5.063-3.019 5.063-7.379 0-3.858-2.772-6.557-6.729-6.557-4.583 0-7.274 3.438-7.274 6.992 0 1.384.533 2.867 1.197 3.675.131.16.15.3.111.463-.122.506-.393 1.603-.446 1.827-.07.294-.231.357-.534.214-2.006-.935-3.26-3.867-3.26-6.221 0-5.082 3.693-9.746 10.648-9.746 5.591 0 9.937 3.983 9.937 9.303 0 5.551-3.501 10.017-8.363 10.017-1.633 0-3.168-.849-3.694-1.85 0 0-.808 3.078-.1.004 1.206-4.667 1.413-5.502 2.037-7.393.46-1.272.845-2.27 1.124-3.078 1.51.456 3.101.706 4.746.706 8.837 0 16-7.163 16-16S24.837 0 16 0z" fill="#E60023"/>
+      </svg>
+      <span class="logo-text">SnapTrend</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" routerLink="/">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.69l5.66 5.66a1 1 0 1 1-1.41 1.41L13 6.51V20a1 1 0 0 1-2 0V6.51l-3.25 3.25a1 1 0 1 1-1.41-1.41L12 2.69z"/>
+          <path d="M21 15v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 2 0v4h14v-4a1 1 0 0 1 2 0z"/>
+        </svg>
+        Accueil
+      </button>
+      <button class="nav-btn" (click)="navigateToHome()">
+        Explorer
+      </button>
+      <button class="nav-btn" routerLink="/create">
+        Créer
+      </button>
+    </nav>
+    <div class="search-container">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Rechercher"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+    <div class="user-actions">
+      <button class="icon-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      
+      <button class="icon-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+      <div class="user-menu-container">
+        <button class="user-avatar" (click)="toggleUserMenu()">
+          <img  [alt]="currentUser?.name" />
+        </button>
+        <div class="user-menu" *ngIf="showUserMenu">
+          <div class="user-menu-header">
+            <p class="user-menu-name">{{ currentUser?.name }}</p>
+            <p class="user-menu-email">{{ currentUser?.email }}</p>
+          </div>
+          <button class="user-menu-item" (click)="navigateToProfile()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profil
+          </button>
+          <button class="user-menu-item" (click)="logout()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

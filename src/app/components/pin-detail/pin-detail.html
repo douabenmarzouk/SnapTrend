@@ -1,0 +1,106 @@
+<div class="pin-detail-content" *ngIf="pin">
+  <div class="pin-detail-layout">
+    <div class="pin-image-section">
+      <img [src]="pin.image" [alt]="pin.title" class="pin-detail-image" />
+    </div>
+
+  
+    <div class="pin-info-section">
+      <div class="pin-actions">
+        <div class="action-buttons-left">
+          <button class="icon-btn" (click)="onSharePin()" title="Partager">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+              <polyline points="16 6 12 2 8 6"/>
+              <line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </button>
+          <button class="icon-btn" (click)="onDownloadImage()" title="Télécharger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="12" cy="5" r="1"/>
+              <circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+        <button 
+          class="save-btn" 
+          [class.saved]="isSaved"
+          (click)="onSavePin()"
+          [disabled]="isSaved"
+        >
+          {{ isSaved ? '✓ Enregistré' : 'Enregistrer' }}
+        </button>
+      </div>
+
+      <!-- Lien externe -->
+      <div class="external-link" *ngIf="pin.link" (click)="onVisitLink()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        <span class="link-text">{{ pin.link }}</span>
+      </div>
+      <div class="pin-content">
+        <h1 class="pin-title">{{ pin.title }}</h1>
+        <p class="pin-description" *ngIf="pin.description">{{ pin.description }}</p>
+      </div>
+      <div class="pin-tags" *ngIf="pin.tags && pin.tags.length > 0">
+        <span class="tag" *ngFor="let tag of pin.tags">#{{ tag }}</span>
+      </div>
+      <div class="pin-author">
+        <img [src]="pin.author.avatar" [alt]="pin.author.name" class="author-avatar" />
+        <div class="author-info">
+          <h3 class="author-name">{{ pin.author.name }}</h3>
+          <p class="author-stats">{{ pin.saves }} enregistrements</p>
+        </div>
+        <button class="follow-btn">Suivre</button>
+      </div>
+
+      <!-- Section commentaires -->
+      <div class="comments-section">
+        <h3 class="section-title">Commentaires</h3>
+        
+        <div class="comment-input-container">
+          <img [src]="pin.author.avatar" alt="Avatar" class="comment-avatar" />
+          <input 
+            type="text" 
+            class="comment-input" 
+            placeholder="Ajouter un commentaire"
+            [(ngModel)]="comment"
+            (keyup.enter)="onSubmitComment()"
+          />
+        </div>
+
+        <div class="no-comments">
+          <p>Aucun commentaire pour l'instant</p>
+        </div>
+      </div>
+
+      <!-- Pins similaires -->
+      <div class="related-pins" *ngIf="relatedPins.length > 0">
+        <h3 class="section-title">Plus d'idées comme celle-ci</h3>
+        <div class="related-pins-grid">
+          <div 
+            *ngFor="let relatedPin of relatedPins"
+            class="related-pin-item"
+            (click)="onRelatedPinClick(relatedPin)"
+          >
+            <img [src]="relatedPin.image" [alt]="relatedPin.title" />
+            <div class="related-pin-overlay">
+              <span class="related-pin-title">{{ relatedPin.title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

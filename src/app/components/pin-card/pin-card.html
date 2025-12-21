@@ -1,0 +1,42 @@
+<div 
+  class="pin-card" 
+  (mouseenter)="isHovered = true" 
+  (mouseleave)="isHovered = false"
+  (click)="onPinClick()"
+>
+  <div class="pin-image-container">
+    <img [src]="pin.image" [alt]="pin.title" class="pin-image" loading="eager" />
+
+    <div class="pin-overlay" [class.visible]="isHovered">
+      <div class="pin-actions-top">
+        <button class="pin-btn save-btn" (click)="onSavePin($event)">
+          {{ isSaving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+      </div>
+
+      <div class="pin-actions-bottom">
+        <button *ngIf="pin.link" class="pin-icon-btn" (click)="onVisitLink($event)" title="Visiter le site">
+          <!-- SVG pour le lien -->
+        </button>
+
+        <div class="pin-actions-right">
+          <button class="pin-icon-btn" (click)="onSavePin($event)" title="Partager">
+            <!-- SVG partager -->
+          </button>
+
+          <button class="pin-icon-btn" (click)="onMoreOptions($event)" title="Plus d'options">
+            <!-- SVG plus -->
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pin-info">
+    <h3 class="pin-title">{{ pin.title }}</h3>
+    <div class="pin-author" *ngIf="pin.author">
+      <img [src]="pin.author.avatar" [alt]="pin.author.name" class="author-avatar" />
+      <span class="author-name">{{ pin.author.name }}</span>
+    </div>
+  </div>
+</div>

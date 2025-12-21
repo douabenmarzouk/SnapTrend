@@ -1,0 +1,30 @@
+<div class="search-results-page">
+  <div class="search-header">
+    <h1>Résultats pour "{{ searchQuery }}"</h1>
+    <p class="results-count" *ngIf="!loading">{{ pins.length }} résultats trouvés</p>
+  </div>
+
+  <div class="pins-container" *ngIf="!loading">
+  <div class="pins-masonry">
+    <app-pin-card 
+      *ngFor="let pin of pins"
+      [pin]="pin"
+    ></app-pin-card>
+  </div>
+</div>
+
+
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Recherche en cours...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && pins.length === 0">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <h2>Aucun résultat trouvé</h2>
+    <p>Essayez d'autres mots-clés</p>
+  </div>
+</div>

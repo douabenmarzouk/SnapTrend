@@ -1,0 +1,14 @@
+<div class="pins-grid">
+  <app-pin-card 
+    *ngFor="let pin of pins" 
+    [pin]="pin" 
+    (click)="openPinModal(pin)">
+  </app-pin-card>
+</div>
+
+@if (selectedPin) {
+  <app-pin-detail 
+    [pin]="selectedPin"
+    (close)="closeModal()">
+  </app-pin-detail>
+}

@@ -1,0 +1,55 @@
+<div class="home-page">
+  <!-- Filtres de catégories -->
+  <div class="categories-container">
+    <div class="categories-scroll">
+      <button 
+        *ngFor="let category of categories"
+        class="category-chip"
+        [class.active]="selectedCategory === category"
+        (click)="onCategorySelect(category)"
+      >
+        {{ category }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Grille de pins en colonnes -->
+  <div class="pins-container">
+    <div class="pins-masonry">
+      <app-pin-card 
+        *ngFor="let pin of pins"
+        [pin]="pin"
+        (pinClicked)="onPinClicked($event)"
+        (pinSaved)="onPinSaved($event)"
+      ></app-pin-card>
+    </div>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement de nouvelles idées...</p>
+  </div>
+
+  <!-- Message quand il n'y a pas de pins -->
+  <div class="empty-state" *ngIf="!loading && pins.length === 0">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <h2>Aucun pin trouvé</h2>
+    <p>Essayez une autre catégorie ou recherchez quelque chose</p>
+  </div>
+  <!-- MODAL PIN DETAIL -->
+  <div class="pin-modal" *ngIf="showModal">
+  <div class="pin-modal-overlay" (click)="onCloseModal()"></div>
+
+  <div class="pin-modal-content">
+    <app-pin-detail
+      [pin]="selectedPin"
+      (closeModal)="onCloseModal()"
+    ></app-pin-detail>
+  </div>
+</div>
+
+</div>
