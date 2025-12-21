@@ -15,7 +15,7 @@ pipeline {
     }
 
     environment {
-        GIT_CRED = credentials('my-nodeappcrud')
+        GIT_CRED = credentials('github_cred')
     }
 
     stages {
