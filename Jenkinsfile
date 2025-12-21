@@ -36,8 +36,8 @@ pipeline {
         stage('Build') {
             steps {
                 // Ajouter Angular CLI au PATH pour Jenkins
-                bat 'set PATH=C:\\Users\\Doua\\AppData\\Roaming\\npm;%PATH% && ng build'
-                echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
+                 bat 'npx ng build'
+                 echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
             }
         }
 
