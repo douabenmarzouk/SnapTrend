@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         nodejs 'node-22.18'
-        maven 'maven'
     }
 
     triggers {
@@ -11,63 +10,76 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'DEBUG_BUILD', defaultValue: true, description: 'Activer lint et tests.')
+        booleanParam(
+            name: 'DEBUG_BUILD',
+            defaultValue: true,
+            description: 'Activer lint et tests'
+        )
     }
 
     environment {
-        GIT_CRED = credentials('github_cred')
         SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/douabenmarzouk/SnapTrend.git', credentialsId: 'github_cred'
+                git branch: 'main',
+                    url: 'https://github.com/douabenmarzouk/SnapTrend.git',
+                    credentialsId: 'github_cred'
             }
         }
 
         stage('Install Dependencies') {
-            steps { bat 'npm install' }
+            steps {
+                bat 'npm install'
+            }
         }
 
         stage('Build') {
-            steps { bat 'npx ng build' }
+            steps {
+                bat 'npx ng build'
+            }
         }
 
-        stage('Quality Checks') {
-            when { expression { return params.DEBUG_BUILD } }
-            stages {
-                stage('Lint') {
-                    steps { bat 'npx ng lint || exit 0' }
-                }
+        stage('Lint') {
+            when { expression { params.DEBUG_BUILD } }
+            steps {
+                bat 'npx ng lint || exit 0'
+            }
+        }
 
-                stage('Test') {
-                    steps { bat 'npx ng test --watch=false || exit 0' }
-                }
+        stage('Test') {
+            when { expression { params.DEBUG_BUILD } }
+            steps {
+                bat 'npx ng test --watch=false || exit 0'
+            }
+        }
 
-                stage('SonarQube Analysis') {
-                     environment {
-                                SONAR_HOST_URL = 'http://localhost:9000' 
-                                SONAR_AUTH_TOKEN=credentials('SONAR_TOKEN')
-                               }
-
-
-                    steps {
-                            bat 'mvn sonar:sonar -Dsonar.projectKey=sample_project -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
-                        }
-                    }
-                }
+        stage('SonarQube Analysis') {
+            steps {
+                bat '''
+                sonar-scanner ^
+                -Dsonar.projectKey=SnapTrend ^
+                -Dsonar.sources=src ^
+                -Dsonar.host.url=%SONAR_HOST_URL% ^
+                -Dsonar.login=%SONAR_TOKEN%
+                '''
             }
         }
     }
 
     post {
-        always { archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true }
-        success { echo 'Build complet avec succès !' }
+        always {
+            archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
+        }
+        success {
+            echo 'Build complet avec succès !'
+        }
         failure {
-            mail to: 'benmarzoudoua@gmail.com',
-                 subject: "Échec du build Jenkins: ${env.JOB_NAME}",
-                 body: "Le build #${env.BUILD_NUMBER} a échoué. Voir les logs: ${env.BUILD_URL}"
+            echo 'Échec du build'
         }
     }
 }
