@@ -6,80 +6,56 @@ pipeline {
     }
 
     triggers {
-        // Déclenche le pipeline si Git détecte un nouveau commit
-        pollSCM('H/10 * * * 1-5') // toutes les 10 minutes du lundi au vendredi
+        pollSCM('H/10 * * * 1-5')
     }
 
     parameters {
-        booleanParam(name: 'DEBUG_BUILD', defaultValue: true, description: 'Activer les vérifications de code (lint, tests).')
+        booleanParam(name: 'DEBUG_BUILD', defaultValue: true, description: 'Activer lint et tests.')
     }
 
     environment {
         GIT_CRED = credentials('github_cred')
-        SONAR_AUTH_TOKEN = credentials('jenkins-sonare')
         SONAR_HOST_URL = 'http://localhost:9000'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/douabenmarzouk/SnapTrend.git',
-                    credentialsId: 'github_cred'
+                git branch: 'main', url: 'https://github.com/douabenmarzouk/SnapTrend.git', credentialsId: 'github_cred'
             }
         }
 
         stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
+            steps { bat 'npm install' }
         }
 
         stage('Build') {
-            steps {
-                bat 'npx ng build'
-                echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
-            }
+            steps { bat 'npx ng build' }
         }
 
         stage('Quality Checks') {
             when { expression { return params.DEBUG_BUILD } }
-            parallel {
-
+            stages {
                 stage('Lint') {
-                    steps {
-                        bat 'npx ng lint || exit 0'
-                    }
-                    post {
-                        success { echo 'Lint succeeded.' }
-                        failure { echo 'Lint failed.' }
-                        unstable { echo 'Lint has warnings.' }
-                    }
-                }
-
-                stage('SonarQube Scan') {
-                    steps {
-                        withSonarQubeEnv('sq1') {
-                            bat """
-                                sonar-scanner ^
-                                -Dsonar.projectKey=SnapTrend ^
-                                -Dsonar.sources=src ^
-                                -Dsonar.host.url=%SONAR_HOST_URL% ^
-                                -Dsonar.login=%SONAR_AUTH_TOKEN%
-                            """
-                        }
-                    }
+                    steps { bat 'npx ng lint || exit 0' }
                 }
 
                 stage('Test') {
+                    steps { bat 'npx ng test --watch=false || exit 0' }
+                }
+
+                stage('SonarQube Analysis') {
                     steps {
-                        // Ignorer les échecs pour l'instant si Karma échoue
-                        bat 'npx ng test --watch=false || exit 0'
-                    }
-                    post {
-                        success { echo 'Tests passed.' }
-                        failure { echo 'Tests failed, mais le pipeline continue.' }
+                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {
+                            bat """
+                            sonar-scanner ^
+                            -Dsonar.projectKey=SnapTrend ^
+                            -Dsonar.sources=src ^
+                            -Dsonar.host.url=%SONAR_HOST_URL% ^
+                            -Dsonar.login=%SONAR_LOGIN% ^
+                            -Dsonar.sourceEncoding=UTF-8
+                            """
+                        }
                     }
                 }
             }
@@ -87,14 +63,8 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Pipeline terminé.'
-            // Archiver le build Angular
-            archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
-        }
-        success {
-            echo 'Build complet avec succès !'
-        }
+        always { archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true }
+        success { echo 'Build complet avec succès !' }
         failure {
             mail to: 'benmarzoudoua@gmail.com',
                  subject: "Échec du build Jenkins: ${env.JOB_NAME}",
