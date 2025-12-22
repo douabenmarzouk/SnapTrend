@@ -3,6 +3,7 @@ pipeline {
 
     tools {
         nodejs 'node-22.18'
+        maven 'maven'
     }
 
     triggers {
@@ -45,16 +46,14 @@ pipeline {
                 }
 
                 stage('SonarQube Analysis') {
+                     environment {
+                                SONAR_HOST_URL = 'http://localhost:9000' 
+                                SONAR_AUTH_TOKEN=credentials('SONAR_TOKEN')
+                               }
+
+
                     steps {
-                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {
-                            bat """
-                            sonar-scanner ^
-                            -Dsonar.projectKey=SnapTrend ^
-                            -Dsonar.sources=src ^
-                            -Dsonar.host.url=%SONAR_HOST_URL% ^
-                            -Dsonar.login=%SONAR_LOGIN% ^
-                            -Dsonar.sourceEncoding=UTF-8
-                            """
+                            bat 'mvn sonar:sonar -Dsonar.projectKey=sample_project -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
                         }
                     }
                 }
