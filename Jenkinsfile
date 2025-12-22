@@ -17,15 +17,16 @@ pipeline {
     environment {
         GIT_CRED = credentials('github_cred')
         SONAR_AUTH_TOKEN = credentials('jenkins-sonare')
-        SONAR_HOST_URL = 'http://localhost:9000'    // ID de ton credential GitHub
+        SONAR_HOST_URL = 'http://localhost:9000'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/douabenmarzouk/SnapTrend.git',
-                    credentialsId: "${env.GIT_CRED}"
+                    credentialsId: 'github_cred'
             }
         }
 
@@ -37,19 +38,18 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Ajouter Angular CLI au PATH pour Jenkins
-                 bat 'npx ng build'
-                 echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
+                bat 'npx ng build'
+                echo "DEBUG_BUILD = ${params.DEBUG_BUILD}"
             }
         }
 
         stage('Quality Checks') {
             when { expression { return params.DEBUG_BUILD } }
             parallel {
+
                 stage('Lint') {
                     steps {
                         bat 'npx ng lint || exit 0'
-
                     }
                     post {
                         success { echo 'Lint succeeded.' }
@@ -57,25 +57,25 @@ pipeline {
                         unstable { echo 'Lint has warnings.' }
                     }
                 }
+
                 stage('SonarQube Scan') {
                     steps {
                         withSonarQubeEnv('sq1') {
-                            bat '''
-                              sonar-scanner \
-                              -Dsonar.projectKey=SnapTrend \
-                              -Dsonar.sources=src \
-                              -Dsonar.host.url=http://localhost:9000 \
-                              -Dsonar.login=<SONAR_AUTH_TOKEN>
-
-                            '''
+                            bat """
+                                sonar-scanner ^
+                                -Dsonar.projectKey=SnapTrend ^
+                                -Dsonar.sources=src ^
+                                -Dsonar.host.url=%SONAR_HOST_URL% ^
+                                -Dsonar.login=%SONAR_AUTH_TOKEN%
+                            """
                         }
                     }
                 }
+
                 stage('Test') {
                     steps {
-                        // Ignore les échecs pour l'instant si Karma échoue sur Edge
-                         bat 'npx ng test --watch=false || exit 0'
-
+                        // Ignorer les échecs pour l'instant si Karma échoue
+                        bat 'npx ng test --watch=false || exit 0'
                     }
                     post {
                         success { echo 'Tests passed.' }
@@ -96,9 +96,9 @@ pipeline {
             echo 'Build complet avec succès !'
         }
         failure {
-         mail to: 'benmarzoudoua@gmail.com',
-             subject: "Échec du build Jenkins: ${env.JOB_NAME}",
-             body: "Le build #${env.BUILD_NUMBER} a échoué. Voir les logs: ${env.BUILD_URL}"
-    }
+            mail to: 'benmarzoudoua@gmail.com',
+                 subject: "Échec du build Jenkins: ${env.JOB_NAME}",
+                 body: "Le build #${env.BUILD_NUMBER} a échoué. Voir les logs: ${env.BUILD_URL}"
+        }
     }
 }
