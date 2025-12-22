@@ -60,7 +60,7 @@ pipeline {
 
                 stage('SonarQube Scan') {
                     steps {
-                        withSonarQubeEnv('sq1') {
+                        withSonarQubeEnv('SonarScanner') {
                             bat """
                                 sonar-scanner ^
                                 -Dsonar.projectKey=SnapTrend ^
