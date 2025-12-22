@@ -61,7 +61,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 bat '''
-                sonar-scanner ^
+                npx sonar-scanner ^
                 -Dsonar.projectKey=SnapTrend ^
                 -Dsonar.sources=src ^
                 -Dsonar.host.url=%SONAR_HOST_URL% ^
