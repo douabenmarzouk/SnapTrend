@@ -87,7 +87,7 @@ pipeline {
                   DOCKER = credentials('doua-dockerhub') }
             steps {
                 bat '''
-                echo|set /p="%DOCKER_PSW%" | docker login -u %DOCKER_USR% --password-stdin
+                echo|set /p="%DOCKER_PSW%" | docker login -u doua82400 --password-stdin
                 ''' }
 }
 
