@@ -106,7 +106,7 @@ pipeline {
             echo 'Build complet avec succes !'
         }
         failure {
-            echo 'Echec du build'
+            echo 'Echec build'
         }
     }
 }
