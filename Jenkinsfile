@@ -20,7 +20,9 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('SONAR_TOKEN')
-        DOCKERHUB_CREDENTIALS=credentials('doua-dockerHub')
+        DOCKERHUB = credentials('doua-dockerHub')
+        IMAGE_NAME = 'doua82500/angular-docker'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -39,7 +41,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Angular') {
             steps {
                 bat 'npx ng build'
             }
@@ -61,56 +63,47 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                bat '''
+                bat """
                 npx sonar-scanner ^
                 -Dsonar.projectKey=SnapTrend ^
                 -Dsonar.sources=src ^
                 -Dsonar.host.url=%SONAR_HOST_URL% ^
                 -Dsonar.login=%SONAR_TOKEN%
-                '''
-            }
-        }
-    }
-
-
-    stages {
-
-        stage('Build Image') {
-            steps {
-                sh 'docker build -t doua82500/angular-docker:latest .'
+                """
             }
         }
 
-        stage('Login Docker Hub') {
+        stage('Docker Build') {
             steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
             }
         }
 
-        stage('Push Image') {
+        stage('Docker Login') {
             steps {
-                sh 'docker push doua82500/angular-docker:latest'
+                bat """
+                echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin
+                """
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
             }
         }
     }
 
     post {
         always {
-            sh 'docker logout'
-        }
-    }
-}
-
-
-    post {
-        always {
+            bat 'docker logout'
             archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
         }
         success {
-            echo 'Build complet avec succès !'
+            echo '✅ Build complet avec succès !'
         }
         failure {
-            echo 'Échec du build'
+            echo '❌ Échec du build'
         }
     }
 }
