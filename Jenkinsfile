@@ -65,29 +65,33 @@ pipeline {
             }
             steps {
                 bat '''
-                  npx sonar-scanner ^
-                  -Dsonar.projectKey=SnapTrend ^
-                  -Dsonar.sources=src ^
-                  -Dsonar.host.url=%SONAR_HOST_URL% ^
-                  -Dsonar.login=%SONAR_TOKEN%
+                npx sonar-scanner ^
+                -Dsonar.projectKey=SnapTrend ^
+                -Dsonar.sources=src ^
+                -Dsonar.host.url=%SONAR_HOST_URL% ^
+                -Dsonar.login=%SONAR_TOKEN%
                 '''
             }
         }
 
-        stage('Docker Build & Push') {
+        stage('Docker Build') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'doua-dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    bat '''
-                      docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                      docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
-                      docker push %IMAGE_NAME%:%IMAGE_TAG%
-                      docker logout
-                    '''
-                }
+                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+            }
+        }
+
+        stage('Docker Login') {
+            environment {
+                DOCKERHUB = credentials('doua-dockerhub')
+            }
+            steps {
+                bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                bat 'docker push %IMAGE_NAME%:%IMAGE_TAG%'
             }
         }
     }
@@ -97,10 +101,10 @@ pipeline {
             archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
         }
         success {
-            echo ' Build complet avec succes !'
+            echo 'Build complet avec succes !'
         }
         failure {
-            echo ' Echec du build'
+            echo 'Echec du build'
         }
     }
 }
