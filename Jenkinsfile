@@ -20,6 +20,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('SONAR_TOKEN')
+        DOCKERHUB_CREDENTIALS=credentials('doua-dockerHub')
     }
 
     stages {
@@ -70,6 +71,36 @@ pipeline {
             }
         }
     }
+
+
+    stages {
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t doua82500/angular-docker:latest .'
+            }
+        }
+
+        stage('Login Docker Hub') {
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker push doua82500/angular-docker:latest'
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout'
+        }
+    }
+}
+
 
     post {
         always {

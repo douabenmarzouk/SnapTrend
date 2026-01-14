@@ -1,0 +1,6 @@
+projectKey=SnapTrend
+serverUrl=http://localhost:9000
+serverVersion=10.2.1.78527
+dashboardUrl=http://localhost:9000/dashboard?id=SnapTrend
+ceTaskId=AZtDk7frwVWrH_HhI3bJ
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AZtDk7frwVWrH_HhI3bJ
