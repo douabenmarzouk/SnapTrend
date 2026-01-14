@@ -18,7 +18,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'doua82500/angular-docker'
+        IMAGE_NAME = 'doua82400/angulare-app'
         IMAGE_TAG  = 'latest'
         SONAR_HOST_URL = 'http://localhost:9000'
     }
@@ -77,7 +77,7 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'doua-dockerHub',
+                    credentialsId: 'doua-dockerhub',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
