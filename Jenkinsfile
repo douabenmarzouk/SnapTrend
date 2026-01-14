@@ -82,10 +82,10 @@ pipeline {
 
         stage('Docker Login') {
             environment {
-                DOCKERHUB = credentials('doua-dockerhub')
+                DOCKER = credentials('doua-dockerhub')
             }
             steps {
-                bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
+                bat 'echo %DOCKER_PSW% | docker login -u %DOCKER_USR% --password-stdin'
             }
         }
 
