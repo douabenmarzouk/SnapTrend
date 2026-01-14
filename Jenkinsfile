@@ -86,10 +86,10 @@ pipeline {
             archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
         }
         success {
-            echo '✅ Build complet avec succès !'
+            echo ' Build complet avec succès !'
         }
         failure {
-            echo '❌ Échec du build'
+            echo ' Échec du build'
         }
     }
 }
