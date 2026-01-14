@@ -74,10 +74,12 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+       stage('Docker Build') {
             steps {
-                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
-            }
+                bat '''
+                set DOCKER_BUILDKIT=0
+                docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                ''' }
         }
 
         stage('Docker Login') {
