@@ -90,7 +90,14 @@ pipeline {
                 '''
     }
 }
-
+        stage('Prepare Docker Config') {
+            steps {
+                bat '''
+                 mkdir .docker 2>nul
+                 echo { } > .docker\\config.json
+                 '''
+    }
+}
         stage('Docker Login') {
             environment {
                   DOCKER = credentials('doua-dockerhub') }
