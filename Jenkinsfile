@@ -99,12 +99,19 @@ pipeline {
     }
 }
         stage('Docker Login') {
-            environment {
-                  DOCKER = credentials('doua-dockerhub') }
             steps {
-                bat '''
-                echo|set /p="%DOCKER_PSW%" | docker login -u doua82400 --password-stdin
-                ''' }
+                 withCredentials([usernamePassword(
+                 credentialsId: 'doua-dockerhub',
+                 usernameVariable: 'DOCKER_USER',
+                 passwordVariable: 'DOCKER_PSW' )]) {
+                 bat '''
+                 docker logout
+                 docker login -u %DOCKER_USER% -p %DOCKER_PSW%
+                 '''
+        }
+    }
+}
+
 }
 
         stage('Docker Push') {
