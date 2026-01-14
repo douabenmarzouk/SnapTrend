@@ -19,8 +19,6 @@ pipeline {
 
     environment {
         SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_TOKEN = credentials('SONAR_TOKEN')
-        DOCKERHUB = credentials('doua-dockerHub')
         IMAGE_NAME = 'doua82500/angular-docker'
         IMAGE_TAG = 'latest'
     }
@@ -62,41 +60,29 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            environment {
+                SONAR_TOKEN = credentials('SONAR_TOKEN')
+            }
             steps {
-                bat """
-                npx sonar-scanner ^
-                -Dsonar.projectKey=SnapTrend ^
-                -Dsonar.sources=src ^
-                -Dsonar.host.url=%SONAR_HOST_URL% ^
-                -Dsonar.login=%SONAR_TOKEN%
-                """
+                bat 'npx sonar-scanner -Dsonar.projectKey=SnapTrend -Dsonar.sources=src -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.login=%SONAR_TOKEN%'
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
+        stage('Docker Build & Push') {
+            environment {
+                DOCKERHUB = credentials('doua-dockerHub')
             }
-        }
-
-        stage('Docker Login') {
             steps {
-                bat """
-                echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin
-                """
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
+                bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
+                bat 'echo %DOCKERHUB_PSW% | docker login -u %DOCKERHUB_USR% --password-stdin'
+                bat 'docker push %IMAGE_NAME%:%IMAGE_TAG%'
+                bat 'docker logout'
             }
         }
     }
 
     post {
         always {
-            bat 'docker logout'
             archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
         }
         success {
