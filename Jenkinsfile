@@ -17,11 +17,17 @@ pipeline {
         )
     }
 
-    environment {
-        IMAGE_NAME = 'doua82400/angulare-app'
-        IMAGE_TAG  = 'latest'
-        SONAR_HOST_URL = 'http://localhost:9000'
-    }
+     environment {
+     IMAGE_NAME = 'doua82400/angulare-app'
+     IMAGE_TAG  = 'latest'
+     SONAR_HOST_URL = 'http://localhost:9000'
+
+    // Chemins Docker Desktop (ajoute les deux variantes courantes)
+     PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;" +
+           "C:\\Program Files\\Docker\\Docker\\resources;" +
+           "C:\\Program Files\\Docker\\cli-plugins;" +
+           "${env.PATH}"
+}
 
     stages {
 
@@ -74,13 +80,16 @@ pipeline {
             }
         }
 
-       stage('Docker Build') {
+        stage('Docker Build') {
             steps {
-                bat '''
-                set DOCKER_BUILDKIT=0
-                docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
-                ''' }
-        }
+               bat 'docker --version || echo "Docker pas trouve - verifie PATH"'
+               bat 'docker info || echo "Docker info echoue - probleme daemon"'
+               bat '''
+               set DOCKER_BUILDKIT=0
+               docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                '''
+    }
+}
 
         stage('Docker Login') {
             environment {
