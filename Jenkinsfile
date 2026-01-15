@@ -87,6 +87,24 @@ pipeline {
                 bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
             }
         }
+         stage('Security Scan - Trivy') {
+           steps {
+                bat '''
+                echo ===== Trivy security scan =====
+
+                REM cache temporaire (pas de stockage long)
+                set TRIVY_CACHE_DIR=%WORKSPACE%\\.trivy-cache
+
+                trivy image ^
+                --severity HIGH,CRITICAL ^
+                --no-progress ^
+                 doua82400/angulare-app:latest
+
+                REM nettoyage cache
+                rmdir /s /q %WORKSPACE%\\.trivy-cache
+                 '''  }
+}
+
        
 
 
@@ -112,6 +130,12 @@ pipeline {
                 bat 'docker logout'
             }
         }
+        stage('Docker Cleanup') {
+            steps {
+             bat 'docker image prune -f'
+    }
+}
+
     }
 
     post {
