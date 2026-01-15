@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-
     tools {
         nodejs 'node-22.18'
     }
@@ -87,55 +86,55 @@ pipeline {
                 bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
             }
         }
-         stage('Security Scan - Trivy') {
-           steps {
+
+        stage('Security Scan - Trivy') {
+            steps {
                 bat '''
                 echo ===== Trivy security scan =====
-
-                REM cache temporaire (pas de stockage long)
                 set TRIVY_CACHE_DIR=%WORKSPACE%\\.trivy-cache
 
                 trivy image ^
                 --severity HIGH,CRITICAL ^
                 --no-progress ^
-                 doua82400/angulare-app:latest
+                %IMAGE_NAME%:%IMAGE_TAG%
 
-                REM nettoyage cache
                 rmdir /s /q %WORKSPACE%\\.trivy-cache
-                 '''  }
-}
-
-       
-
-
-        // ❌ Prepare Docker Config SUPPRIMÉ (cause du problème)
+                '''
+            }
+        }
 
         stage('Docker Login') {
-           steps {
+            steps {
                 withCredentials([usernamePassword(
-                credentialsId: 'doua-dockerhub',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PSW' )]) {
-                bat '''
-                echo %DOCKER_PSW% | docker login -u %DOCKER_USER% --password-stdin
-                '''
-        }
-    }
-}
+                    credentialsId: 'doua-dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PSW'
+                )]) {
+                    bat '''
+                    REM Forcer un docker config LOCAL (évite Windows Credential Manager)
+                    set DOCKER_CONFIG=%WORKSPACE%\\.docker
+                    mkdir %DOCKER_CONFIG% 2>NUL
 
+                    echo %DOCKER_PSW% | docker login -u %DOCKER_USER% --password-stdin
+                    '''
+                }
+            }
+        }
 
         stage('Docker Push') {
             steps {
-                bat 'docker push %IMAGE_NAME%:%IMAGE_TAG%'
-                bat 'docker logout'
+                bat '''
+                docker push %IMAGE_NAME%:%IMAGE_TAG%
+                docker logout
+                '''
             }
         }
+
         stage('Docker Cleanup') {
             steps {
-             bat 'docker image prune -f'
-    }
-}
-
+                bat 'docker image prune -f'
+            }
+        }
     }
 
     post {
