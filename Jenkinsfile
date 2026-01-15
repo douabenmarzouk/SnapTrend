@@ -1,5 +1,6 @@
 pipeline {
-    agent { label 'my_agent' }
+    agent any
+
 
     tools {
         nodejs 'node-22.18'
