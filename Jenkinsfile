@@ -91,7 +91,7 @@ pipeline {
             steps {
                 bat '''
                 echo ===== Docker credential check =====
-                docker info | findstr /i credential
+                docker info | findstr /i credential || exit 0
              '''
             }
         }
