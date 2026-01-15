@@ -86,27 +86,36 @@ pipeline {
                 bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
             }
         }
+        stage('Docker Credential Check') {
+            steps {
+                bat '''
+                echo ===== Docker credential check =====
+                docker info | findstr /i credential
+             '''
+            }
+        }
+
 
         // ❌ Prepare Docker Config SUPPRIMÉ (cause du problème)
 
         stage('Docker Login') {
-            steps {
+           steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'doua-dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PSW'
-                )]) {
-                    bat '''
-                    docker logout
-                    docker login -u %DOCKER_USER% -p %DOCKER_PSW%
-                    '''
-                }
-            }
+                credentialsId: 'doua-dockerhub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PSW' )]) {
+                bat '''
+                echo %DOCKER_PSW% | docker login -u %DOCKER_USER% --password-stdin
+                '''
         }
+    }
+}
+
 
         stage('Docker Push') {
             steps {
                 bat 'docker push %IMAGE_NAME%:%IMAGE_TAG%'
+                bat 'docker logout'
             }
         }
     }
