@@ -87,14 +87,7 @@ pipeline {
                 bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
             }
         }
-        stage('Docker Credential Check') {
-            steps {
-                bat '''
-                echo ===== Docker credential check =====
-                docker info | findstr /i credential || exit 0
-             '''
-            }
-        }
+       
 
 
         // ❌ Prepare Docker Config SUPPRIMÉ (cause du problème)
