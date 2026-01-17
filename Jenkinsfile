@@ -46,7 +46,7 @@ pipeline {
 
         stage('Build Angular') {
             steps {
-                bat 'npx ng build'
+                bat 'npx ng build --configuration production'
             }
         }
 
@@ -71,10 +71,10 @@ pipeline {
             steps {
                 bat '''
                 npx sonar-scanner ^
-                -Dsonar.projectKey=SnapTrend ^
-                -Dsonar.sources=src ^
-                -Dsonar.host.url=%SONAR_HOST_URL% ^
-                -Dsonar.login=%SONAR_TOKEN%
+                  -Dsonar.projectKey=SnapTrend ^
+                  -Dsonar.sources=src ^
+                  -Dsonar.host.url=%SONAR_HOST_URL% ^
+                  -Dsonar.login=%SONAR_TOKEN%
                 '''
             }
         }
@@ -94,11 +94,12 @@ pipeline {
                 set TRIVY_CACHE_DIR=%WORKSPACE%\\.trivy-cache
 
                 trivy image ^
-                --severity HIGH,CRITICAL ^
-                --no-progress ^
-                %IMAGE_NAME%:%IMAGE_TAG%
+                  --severity HIGH,CRITICAL ^
+                  --no-progress ^
+                  --timeout 10m ^
+                  %IMAGE_NAME%:%IMAGE_TAG%
 
-                rmdir /s /q %WORKSPACE%\\.trivy-cache
+                if exist %WORKSPACE%\\.trivy-cache rmdir /s /q %WORKSPACE%\\.trivy-cache
                 '''
             }
         }
@@ -111,11 +112,13 @@ pipeline {
                     passwordVariable: 'DOCKER_PSW'
                 )]) {
                     bat '''
-                    REM Forcer un docker config LOCAL (évite Windows Credential Manager)
+                    REM Docker config local pour éviter Windows Credential Manager
                     set DOCKER_CONFIG=%WORKSPACE%\\.docker
                     mkdir %DOCKER_CONFIG% 2>NUL
 
-                    echo %DOCKER_PSW% | docker login -u %DOCKER_USER% --password-stdin
+                    echo {"credsStore": ""} > %DOCKER_CONFIG%\\config.json
+
+                    echo %DOCKER_PSW% | docker --config %DOCKER_CONFIG% login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
@@ -124,8 +127,8 @@ pipeline {
         stage('Docker Push') {
             steps {
                 bat '''
-                docker push %IMAGE_NAME%:%IMAGE_TAG%
-                docker logout
+                docker --config %WORKSPACE%\\.docker push %IMAGE_NAME%:%IMAGE_TAG%
+                docker --config %WORKSPACE%\\.docker logout
                 '''
             }
         }
@@ -135,6 +138,20 @@ pipeline {
                 bat 'docker image prune -f'
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            environment {
+                KUBECONFIG = 'C:\\Users\\Jenkins\\.kube\\config'
+            }
+            steps {
+                bat '''
+                echo ===== Deployment Kubernetes =====
+                kubectl apply -f C:\\Users\\Doua\\Documents\\pinterest-app\\k8s\\deploymentservice.yaml
+                kubectl rollout status deployment/frontend-deployment
+                '''
+            }
+        }
+
     }
 
     post {
@@ -142,10 +159,10 @@ pipeline {
             archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
         }
         success {
-            echo 'Build complet avec succes !'
+            echo 'Build complet avec succès !'
         }
         failure {
-            echo 'Echec build'
+            echo 'Échec du build'
         }
     }
 }
