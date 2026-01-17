@@ -104,25 +104,28 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Test Docker Login') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'doua-dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PSW'
-                )]) {
-                    bat '''
-                    REM Docker config local pour éviter Windows Credential Manager
-                    set DOCKER_CONFIG=%WORKSPACE%\\.docker
-                    mkdir %DOCKER_CONFIG% 2>NUL
-
-                    echo {"credsStore": ""} > %DOCKER_CONFIG%\\config.json
-
-                    echo %DOCKER_PSW% | docker --config %DOCKER_CONFIG% login -u %DOCKER_USER% --password-stdin
-                    '''
-                }
-            }
+              withCredentials([usernamePassword(
+              credentialsId: 'doua-dockerhub', 
+              usernameVariable: 'DOCKER_USER', 
+              passwordVariable: 'DOCKER_PSW'
+        )]) {
+              bat '''
+              echo ===== Docker Login Test =====
+            
+              REM Login sécurisé
+              docker login -u %DOCKER_USER% -p %DOCKER_PSW%
+            
+              REM Vérifier que l'image peut être taguée (pas besoin de push ici)
+              docker tag %IMAGE_NAME%:%IMAGE_TAG% %IMAGE_NAME%:%IMAGE_TAG%
+            
+              REM Logout
+              docker logout
+              '''
         }
+    }
+}
 
         stage('Docker Push') {
             steps {
